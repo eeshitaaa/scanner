@@ -278,3 +278,17 @@
  #unlocked-details .relationship-layout>.relationship-detail{height:510px;top:20px;left:4%;width:92%}
  #unlocked-details .map-legend{font-size:7px;padding:15px;line-height:1.6}
 }
+
+/* The mobile locked preview uses the same portrait dossier proportions. */
+@media(max-width:800px){
+ #wallet-lock-box{min-height:470px}
+ #wallet-lock-box .locked-folder-preview{width:220px;max-width:76%;height:344px;margin:72px auto 54px;left:-12px}
+ #wallet-lock-box .locked-folder-preview:before{content:"";position:absolute;left:5px;top:-18px;width:210px;max-width:96%;height:350px;border:1px solid #6e8976;border-radius:13px;background:linear-gradient(130deg,#344b3b,#13251a);box-shadow:0 14px 25px #0007}
+ #wallet-lock-box .locked-folder-preview .folder-surface{inset:0;width:100%;height:344px}
+ #wallet-lock-box .locked-folder-preview>span{left:23px;top:auto;bottom:70px;max-width:130px;font-size:28px;line-height:1.12}
+ #wallet-lock-box .locked-file-stack{inset:-4px 11px auto;height:324px}
+ #wallet-lock-box .locked-file-stack>i{top:0;height:324px;border-radius:9px}
+ #wallet-lock-box .locked-file-stack b{left:auto;right:-34px;top:calc(10px + var(--i)*30px);width:36px;height:28px;border:1px solid #c4d3be;border-left:0;border-radius:0 7px 7px 0;font:10px/28px monospace;box-shadow:inset 0 1px #ffffff70}
+ #wallet-lock-box .locked-file-stack>i:nth-child(3n+2),#wallet-lock-box .locked-file-stack>i:nth-child(3n+2) b{background:#a2bda3}
+ #wallet-lock-box .locked-file-stack>i:nth-child(3n),#wallet-lock-box .locked-file-stack>i:nth-child(3n) b{background:#c7d7c0}
+}
