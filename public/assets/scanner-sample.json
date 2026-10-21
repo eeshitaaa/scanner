@@ -1,0 +1,44 @@
+{
+  "source": "https://www.shieldtx.xyz/api/scanner-preview",
+  "captured_at": "2026-09-25T08:09:08Z",
+  "data": {
+    "ok": true,
+    "address": "0xecb63caa47c7c4e77f60f1ce858cf28dc2b82b00",
+    "state": "stale",
+    "privacy_score": 100,
+    "privacy_score_label": "high",
+    "privacy_tier": 1,
+    "copy_exposure": 25,
+    "copier_count": 233715,
+    "copier_count_status": "partial",
+    "recent_activity": {
+      "fill_count": 5819639,
+      "status": "active"
+    },
+    "coverage": {
+      "scan": "stale",
+      "data_quality": "partial",
+      "stale": true,
+      "copy": "partial",
+      "positions": "unavailable",
+      "activity": "active"
+    },
+    "data_warnings": [
+      {
+        "field": "copier_count",
+        "status": "partial",
+        "message": "Copy-trader coverage is partial because very high-activity periods are capped for consistency."
+      },
+      {
+        "field": "counter_count",
+        "status": "disabled",
+        "message": "Counter-trading analysis is disabled in this version."
+      },
+      {
+        "field": "sub_account_score",
+        "status": "disabled",
+        "message": "Some advanced signal components are unavailable until coverage is broad enough."
+      }
+    ]
+  }
+}
