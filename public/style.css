@@ -122,3 +122,18 @@
 @media(max-width:1050px){#unlocked-details .relationship-layout,#unlocked-details .relationship-layout.has-selection{grid-template-columns:minmax(0,1fr)}.relationship-layout>.relationship-detail{border-left:0;border-top:1px solid #ffffff16}.relationship-map #orbit-map{max-width:510px}}
 @media(max-width:800px){.relationship-map #orbit-map,.relationship-map #orbit-map.expanded-network{max-width:440px;aspect-ratio:1;min-height:330px}.network-scene .wallet-node,.relationship-layout.has-selection .wallet-node,.network-scene.zoomed-out .wallet-node{width:84px;height:30px;padding:0;border-radius:15px}.network-scene .wallet-node small,.relationship-layout.has-selection .wallet-node small{font-size:7px}.network-scene .source-wallet{width:43px;height:43px}.source-monogram{font-size:16px}.network-scene .source-wallet>span{top:56px;font-size:6px}.map-legend,.relationship-layout.has-selection .map-legend{font-size:6px;padding:15px}.network-scene.zoomed-out{transform:scale(.94)}}
 @media(prefers-reduced-motion:reduce){#unlocked-details .relationship-layout,.network-scene{transition:none}.connection-flow{animation:none}}
+
+/* Mobile scanner: introduction, instrument, then address entry. */
+@media(max-width:800px){
+ #landing{display:flex;flex-direction:column;min-height:0;gap:24px;padding:42px 24px 48px}
+ #landing .copy{display:contents}
+ #landing .hero-heading{order:0;max-width:490px;width:100%}
+ #landing .hero-heading h1{font-size:clamp(33px,8vw,44px);white-space:normal;margin:16px 0 0}
+ #landing .intro{order:1;width:100%;max-width:490px;font-size:15px;line-height:1.7;margin:0}
+ #landing .visual{order:2;width:100%;max-width:340px;margin:0;align-self:center}
+ #landing .echo-stage{margin:0 0 10px}
+ #landing #scan-form{order:3;width:100%;max-width:490px}
+ #landing label{font-size:13px}#landing input{font-size:14px}
+ #landing .primary,#landing .text-button{font-size:13px}
+ #landing .note,#landing .echo-caption{font-size:11px}
+}
