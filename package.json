@@ -1,0 +1,12 @@
+{
+  "name": "scanner",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "check": "node --check api/share.js && node --check api/card.js && node --check public/sharing.js"
+  }
+}
