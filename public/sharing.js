@@ -8,7 +8,7 @@ function paint(canvas,d){
  let g=c.createLinearGradient(0,0,1200,630);g.addColorStop(0,'#d9f4d8');g.addColorStop(.25,'#a8d7ba');g.addColorStop(.52,'#e4efda');g.addColorStop(.75,'#8fc3b0');g.addColorStop(1,'#bddec1');c.fillStyle=g;c.fillRect(0,0,1200,630);
  // Broad satin reflections give the surface depth without extra ornament.
  c.save();c.translate(600,315);c.rotate(-.35);g=c.createLinearGradient(-900,-100,900,100);g.addColorStop(0,'#ffffff00');g.addColorStop(.42,'#ffffff00');g.addColorStop(.49,'#ffffff3d');g.addColorStop(.54,'#ffffff00');g.addColorStop(1,'#ffffff00');c.fillStyle=g;c.fillRect(-1000,-800,2000,1600);c.restore();
- c.fillStyle='#193e30';c.save();c.translate(58,32);c.scale(280/414,280/414);logoPaths.forEach(path=>c.fill(new Path2D(path)));c.restore();c.font='30px monospace';c.textAlign='right';ink(d.sample?'SAMPLE REPORT':'EXPOSURE REPORT',1140,75);c.textAlign='left';
+ c.fillStyle='#193e30';c.save();c.translate(58,32);c.scale(280/414,280/414);c.fill(new Path2D(logoPaths[0]));c.restore();c.font='30px monospace';c.textAlign='right';ink(d.sample?'SAMPLE REPORT':'EXPOSURE REPORT',1140,75);c.textAlign='left';
  c.fillStyle='#375f4c';c.font='34px monospace';ink('EXPOSURE SCORE',62,175);
  c.fillStyle='#123a2a';c.font='500 236px Arial';ink(String(d.score),48,390);const scoreWidth=c.measureText(String(d.score)).width;c.font='48px Arial';c.fillStyle='#47715c';ink('/100',64+scoreWidth,386);
  c.strokeStyle='#274b3a3b';c.lineWidth=1;c.beginPath();c.moveTo(62,443);c.lineTo(1138,443);c.stroke();
@@ -18,14 +18,17 @@ function paint(canvas,d){
 }
 window.paintExposureCard=paint;
 let payload,shareUrl,shareReady;
+const pendingCards=new Map();
+const cardKey=d=>"shield-card-mark-v2:"+JSON.stringify(d);
+function prepareCard(d){const key=cardKey(d);try{const cached=JSON.parse(localStorage.getItem(key));if(cached?.url)return Promise.resolve(cached.url);}catch{}
+ if(pendingCards.has(key))return pendingCards.get(key);
+ const task=(async()=>{const canvas=document.createElement("canvas");canvas.width=2400;canvas.height=1260;paint(canvas,d);const blob=await new Promise(r=>canvas.toBlob(r,"image/png"));const response=await fetch("/api/share?"+new URLSearchParams({score:d.score,followers:d.followers,sample:d.sample?"1":"0"}),{method:"POST",headers:{"Content-Type":"image/png"},body:blob});if(!response.ok)throw new Error("Share unavailable");const url=(await response.json()).url;try{localStorage.setItem(key,JSON.stringify({url}));}catch{}return url;})();pendingCards.set(key,task);task.catch(()=>pendingCards.delete(key));return task;}
+window.prepareExposureShare=report=>prepareCard({followers:clean(report.data.copier_count,1e12),score:clean(report.data.exposure_score,100),sample:report.example}).catch(()=>{});
 const shareButtons=()=>[...document.querySelectorAll('#share-x,#copy-card-link,#share-link')];
 async function publishCard(d){
  shareButtons().forEach(b=>b.disabled=true);
  $('#share-status').textContent='Preparing your share link…';
- try{const blob=await new Promise(resolve=>$('#share-canvas').toBlob(resolve,'image/png'));
- const response=await fetch('/api/share?'+new URLSearchParams({score:d.score,followers:d.followers,sample:d.sample?'1':'0'}),{method:'POST',headers:{'Content-Type':'image/png'},body:blob});
- if(!response.ok)throw new Error('Share unavailable');
- shareUrl=new URL((await response.json()).url);shareButtons().forEach(b=>b.disabled=false);$('#share-status').textContent='';
+ try{shareUrl=new URL(await prepareCard(d),location.href);shareButtons().forEach(b=>b.disabled=false);$('#share-status').textContent='';
  }catch{$('#share-status').textContent='Could not create a share link. Close and reopen to retry, or download the card.';}
 }
 
