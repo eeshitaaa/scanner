@@ -18,7 +18,7 @@ let folderOpen=true,busy=false,renderedPage=-1,returnTransform='none',closeQueue
 const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,reduced()?0:ms));
 async function motion(element,frames,duration=620){
- if(reduced())return;
+ if(reduced()){Object.assign(element.style,frames[frames.length-1]);return;}
  const animation=element.animate(frames,{duration,easing:'cubic-bezier(.22,.68,.18,1)',fill:'both'});
  try{await animation.finished;Object.assign(element.style,frames[frames.length-1]);}catch{}animation.cancel();
 }
@@ -28,9 +28,9 @@ function draw(){
  if(selected>=0&&(selected<start||selected>=start+visible.length))selected=-1;
  if(renderedPage!==start){
   nodes.replaceChildren();renderedPage=start;
-  visible.forEach((w,j)=>{const i=start+j,card=document.createElement('div');card.className='wallet-file';card.style.setProperty('--slot',j);card.style.setProperty('--depth',14-j);card.style.setProperty('--angle',(j-2)*3+'deg');card.style.setProperty('--lift',Math.abs(j-2)*14+'px');card.setAttribute('aria-label',`Explore wallet ${i+1}: ${short(w.address)}`);card.innerHTML=`<span class="file-edge" aria-hidden="true"></span><button class="file-index" type="button" aria-label="Open wallet ${i+1}: ${esc(short(w.address))}"><span class="tab-number">${String(i+1).padStart(2,'0')}</span></button>`;card.querySelector('.file-index').onclick=()=>{if(!busy&&folderOpen)openCard(i,card);};nodes.append(card);});
+  visible.forEach((w,j)=>{const i=start+j,card=document.createElement('div');card.className='wallet-file';card.dataset.walletSlot=i;card.style.setProperty('--slot',j);card.style.setProperty('--depth',14-j);card.style.setProperty('--angle',(j-2)*3+'deg');card.style.setProperty('--lift',Math.abs(j-2)*14+'px');card.setAttribute('aria-label',`Explore wallet ${i+1}: ${short(w.address)}`);card.innerHTML=`<span class="file-edge" aria-hidden="true"></span><button class="file-index" type="button" aria-label="Open wallet ${i+1}: ${esc(short(w.address))}"><span class="tab-number">${String(i+1).padStart(2,'0')}</span></button>`;card.querySelector('.file-index').onclick=()=>{if(!busy&&folderOpen)openCard(i,card);};nodes.append(card);});
  }
- Array.from(nodes.querySelectorAll('.wallet-file:not(.blank-file)')).forEach((card,j)=>{card.classList.toggle('active',selected===start+j);card.querySelector('.file-index').setAttribute('aria-pressed',String(selected===start+j));card.querySelector('.file-index').tabIndex=folderOpen&&selected<0?0:-1;});
+ Array.from(nodes.querySelectorAll('.wallet-file:not(.blank-file)')).forEach((card,j)=>{card.classList.toggle('active',selected===Number(card.dataset.walletSlot));card.querySelector('.file-index').setAttribute('aria-pressed',String(selected===Number(card.dataset.walletSlot)));card.querySelector('.file-index').tabIndex=folderOpen&&selected<0?0:-1;});
  nodes.inert=!folderOpen||selected>=0;
  $('#show-wallets').hidden=true;$('#show-wallets').textContent=expanded?'← Wallets 01–05':'Wallets 06–10 →';$('#show-wallets').disabled=busy;
  $('#show-wallets').setAttribute('aria-expanded',String(expanded));
@@ -42,48 +42,65 @@ function draw(){
  if(selected>=0){detail();$('.flip-front').innerHTML=`<span class="front-index">${String(selected+1).padStart(2,'0')}</span><strong class="front-address">${esc(short(rows[selected].address))}</strong>`;$('#previous-file').disabled=selected===0||busy;$('#next-file').disabled=selected===rows.length-1||busy;}
  $('#network-insight').textContent='Select 01–10 to explore a wallet';window.saveReportView?.();
 }
-function folderPath(panel,card){
- const source=card.getBoundingClientRect(),target=panel.getBoundingClientRect();
- const x=source.left+source.width/2-target.left-target.width/2;
- const y=source.top+source.height/2-target.top-target.height/2;
- const lift=Math.min(105,Math.max(65,source.height*.3));
- return {inside:`translate(${x}px,${y}px) rotateY(-180deg)`,raised:`translate(${x}px,${y-lift}px) rotateY(-180deg)`};
+// One physical file carries both faces for the entire journey.
+let flight=null;
+function journeyGeometry(card,panel){
+ const scene=$('#network-scene').getBoundingClientRect(),r=card.getBoundingClientRect(),p=panel.getBoundingClientRect(),folder=$('#folder-toggle').getBoundingClientRect();
+ const stored={left:r.left-scene.left,top:r.top-scene.top,width:r.width,height:r.height};
+ const mobile=window.innerWidth<=800;
+ // Portrait files leave through the open side; landscape files lift through the top.
+ const cleared={...stored,left:mobile?folder.right-scene.left+18:stored.left,top:mobile?stored.top:folder.top-scene.top-r.height-12};
+ return {stored,cleared,front:{left:p.left-scene.left,top:p.top-scene.top,width:p.width,height:p.height}};
 }
-function folderLip(){
- const layout=$('.relationship-layout'),cover=$('#folder-toggle'),box=cover.getBoundingClientRect(),parent=layout.getBoundingClientRect();
- const lip=cover.cloneNode(true);
- // Freeze the rendered cover, including typography, before moving it into the overlay.
- [cover,...cover.querySelectorAll('*')].forEach((original,i)=>{const clone=[lip,...lip.querySelectorAll('*')][i],style=getComputedStyle(original);for(const key of style)clone.style.setProperty(key,style.getPropertyValue(key));});
- lip.removeAttribute('id');lip.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));lip.className='return-cover';lip.disabled=true;lip.setAttribute('aria-hidden','true');
- Object.assign(lip.style,{position:'absolute',left:(box.left-parent.left)+'px',top:(box.top-parent.top)+'px',width:box.width+'px',height:box.height+'px',margin:'0',transform:'none',translate:'none',zIndex:'45',transition:'none',pointerEvents:'none'});layout.append(lip);return lip;
-}
+const boxFrame=b=>Object.fromEntries(Object.entries(b).map(([k,v])=>[k,v+'px']));
+async function travelBox(el,from,to,duration){await motion(el,[boxFrame(from),boxFrame(to)],duration);}
 async function openCard(index,card){
- if(busy)return;busy=true;selected=index;frontVisible=true;draw();
- const panel=$('#relationship-detail'),path=folderPath(panel,card),lip=folderLip();
- panel.style.transform=path.inside;
- await motion(panel,[{transform:path.inside},{transform:path.raised}],340);
- lip.remove();
- await motion(panel,[{transform:path.raised},{transform:'translate(0,0) rotateY(-180deg)'}],420);
- await motion(panel,[{transform:'rotateY(-180deg)'},{transform:'rotateY(0deg)'}],480);
- panel.style.transform='';frontVisible=false;busy=false;draw();
+ if(busy)return;busy=true;selected=index;draw();
+ const panel=$('#relationship-detail'),scene=$('#network-scene');
+ const geometry=journeyGeometry(card,panel);
+ const anchor=document.createComment('wallet file slot');card.before(anchor);
+ const panelAnchor=document.createComment('wallet detail slot');panel.before(panelAnchor);
+ const savedStyle=card.getAttribute('style');
+ card.classList.add('motion-file');Object.assign(card.style,boxFrame(geometry.stored));
+ scene.append(card);
+ const face=document.createElement('div');face.className='motion-file-face';
+ while(card.firstChild)face.append(card.firstChild);
+ const address=document.createElement('span');address.className='motion-file-address';address.textContent=short(rows[index].address);face.append(address);
+ card.append(face,panel);panel.classList.add('motion-file-back');
+ flight={card,anchor,panelAnchor,panel,savedStyle,geometry,origin:index};
+ await travelBox(card,geometry.stored,geometry.cleared,580);
+ card.classList.add('motion-file-forward');
+ await travelBox(card,geometry.cleared,geometry.front,650);
+ await motion(card,[{transform:'rotateY(0deg)'},{transform:'rotateY(180deg)'}],650);
+ busy=false;draw();
  if(closeQueued){closeQueued=false;closeDetail();}else $('#close-wallet-detail').focus({preventScroll:true});
 }
 async function closeDetail(){
- if(busy){closeQueued=true;return;}if(selected<0)return;busy=true;const previous=selected;
- const panel=$('#relationship-detail'),card=$('#relationship-nodes').children[previous],path=folderPath(panel,card);
- await motion(panel,[{transform:'rotateY(0deg)'},{transform:'rotateY(-180deg)'}],480);
- $('#orbit-map').classList.add('folder-returning');
- await motion(panel,[{transform:'translate(0,0) rotateY(-180deg)'},{transform:path.raised}],420);
- const lip=folderLip();
- await motion(panel,[{transform:path.raised},{transform:path.inside}],340);
- panel.hidden=true;lip.remove();$('#orbit-map').classList.remove('folder-returning');panel.style.transform='';
- selected=-1;frontVisible=false;busy=false;draw();card?.querySelector('.file-index')?.focus({preventScroll:true});
+ if(busy){closeQueued=true;return;}if(selected<0)return;
+ if(!flight){selected=-1;draw();return;}
+ busy=true;const previous=selected,{card,anchor,panelAnchor,panel,savedStyle,geometry,origin}=flight;
+ // Return to the selected wallet's slot after Next/Previous navigation.
+ let destination=geometry;
+ if(selected!==origin){
+  const slot=$('#relationship-nodes').querySelector(`[data-wallet-slot="${selected}"]`);
+  if(slot)destination=journeyGeometry(slot,panel);
+ }
+ await motion(card,[{transform:'rotateY(180deg)'},{transform:'rotateY(0deg)'}],650);
+ await travelBox(card,geometry.front,destination.cleared,650);
+ card.classList.remove('motion-file-forward');
+ await travelBox(card,destination.cleared,destination.stored,580);
+ panel.classList.remove('motion-file-back');panelAnchor.replaceWith(panel);
+ card.querySelector('.motion-file-address')?.remove();const face=card.querySelector('.motion-file-face');while(face.firstChild)card.append(face.firstChild);face.remove();
+ card.querySelector('.tab-number').textContent=String(origin+1).padStart(2,'0');card.classList.remove('motion-file','motion-file-forward');card.setAttribute('style',savedStyle||'');anchor.replaceWith(card);
+ document.querySelectorAll('.file-away').forEach(el=>el.classList.remove('file-away'));
+ flight=null;selected=-1;busy=false;draw();$('#relationship-nodes').querySelector(`[data-wallet-slot="${previous}"] .file-index`)?.focus({preventScroll:true});
 }
 async function navigateFile(direction){
  const next=selected+direction;if(busy||next<0||next>=rows.length)return;
  busy=true;draw();const content=$('#wallet-detail-content');
  await motion(content,[{transform:'translateX(0px)',opacity:1},{transform:`translateX(${-direction*20}px)`,opacity:0}],170);
- selected=next;draw();
+ $('#relationship-nodes').querySelector(`[data-wallet-slot="${selected}"]`)?.classList.remove('file-away');
+ selected=next;if(flight){flight.card.querySelector('.tab-number').textContent=String(next+1).padStart(2,'0');flight.card.querySelector('.motion-file-address').textContent=short(rows[next].address);}$('#relationship-nodes').querySelector(`[data-wallet-slot="${selected}"]`)?.classList.add('file-away');draw();
  await motion(content,[{transform:`translateX(${direction*20}px)`,opacity:0},{transform:'translateX(0px)',opacity:1}],250);
  busy=false;draw();if(closeQueued){closeQueued=false;closeDetail();}
 }
@@ -91,8 +108,8 @@ $('#previous-file').addEventListener('click',()=>navigateFile(-1));$('#next-file
 // Horizontal touch swipes use the same transition as Previous / Next.
 let swipeStart=null;
 const swipePanel=$('#relationship-detail');
-swipePanel.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||busy||e.target.closest('button,a,input'))return;swipeStart={id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now()};});
-swipePanel.addEventListener('pointerup',e=>{const start=swipeStart;swipeStart=null;if(!start||start.id!==e.pointerId)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5&&performance.now()-start.time<1000)navigateFile(dx<0?1:-1);});
+swipePanel.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||busy||e.target.closest('button,a,input'))return;swipePanel.setPointerCapture(e.pointerId);swipeStart={id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now()};});
+swipePanel.addEventListener('pointerup',e=>{const start=swipeStart;swipeStart=null;if(!start||start.id!==e.pointerId)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5&&performance.now()-start.time<1500)navigateFile(dx<0?1:-1);});
 swipePanel.addEventListener('pointercancel',()=>{swipeStart=null;});
 $('#close-wallet-detail').addEventListener('click',closeDetail);$('#relationship-detail').addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
 window.prepareReportDetails=report=>{
