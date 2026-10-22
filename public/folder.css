@@ -376,3 +376,13 @@ body button:focus-visible{outline:2px solid #f6fefd;outline-offset:4px}
  #unlocked-details .file-navigation{margin-top:12px;padding-top:10px}
 }
 @media(max-width:380px){#landing{padding-inline:14px;gap:10px}#landing .intro{font-size:13px}#landing .actions{gap:13px}#landing .primary{padding-inline:12px;font-size:12px}}
+
+/* Preview: mobile breathing room and compact folder. */
+@media(max-width:800px){
+ #landing{justify-content:flex-start;padding-top:18px;gap:16px}
+ #landing .visual{max-width:clamp(195px,calc(100svh - 450px),290px)}
+ #landing .primary{padding:10px 13px;font-size:12px}
+ .shell header #back{font-size:11px;padding:9px 12px;min-height:34px}
+ #unlocked-details #orbit-map{height:550px;min-height:550px}
+ #unlocked-details .relationship-layout.has-selection #orbit-map{height:550px;min-height:550px}
+}
