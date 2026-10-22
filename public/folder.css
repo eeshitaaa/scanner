@@ -302,11 +302,14 @@ body .quiet:hover,body #share-dialog #share-options:hover{background:#ffffff08;b
 body .text-button{color:#97fce4;font-size:13px;font-weight:500}
 body button.primary:disabled,body button.quiet:disabled{background:#171e29;border-color:transparent;color:#6b7488;cursor:default}
 body button:focus-visible{outline:2px solid #f6fefd;outline-offset:4px}
-.score-card{--exposure-color:#c3cad6}.score-card[data-exposure="high"]{--exposure-color:#ff7b88}.score-card[data-exposure="low"]{--exposure-color:#97fce4}
-.score-card #score,.score-card #score-label{color:var(--exposure-color)}.score-card #meter{background:var(--exposure-color)}
-#unlocked-details .file-navigation button{font-size:13px;font-weight:650;min-height:40px;padding:8px 14px;border-radius:8px;border:1px solid #315a3c55;background:#315a3c0c;color:#173e25}
-#unlocked-details .file-navigation button:hover:not(:disabled){background:#315a3c19;border-color:#315a3c88}
-#unlocked-details .file-navigation button:disabled{opacity:.4;cursor:default}
-#unlocked-details #network-insight{font-size:13px;line-height:1.6;letter-spacing:.1px}
+/* Stable materials and quiet card controls. */
+#unlocked-details .folder-selected #relationship-nodes,#unlocked-details .folder-selected #folder-toggle,#unlocked-details .folder-selected .folder-back{filter:none;opacity:1}
+#unlocked-details .folder-selected #folder-toggle{filter:drop-shadow(0 1px 0 #728778) drop-shadow(0 16px 20px #0006)}
+#unlocked-details .flip-back{overflow:visible;display:flex;flex-direction:column}
+#unlocked-details .file-navigation{margin-top:auto;padding-top:10px;flex-shrink:0}
+#unlocked-details .file-navigation button{font:600 12px var(--sans);min-height:32px;padding:6px 0;border:0;border-radius:0;background:transparent;color:#234f30;box-shadow:none}
+#unlocked-details .file-navigation button:hover:not(:disabled){background:transparent;color:#102b19;text-decoration:underline;text-underline-offset:4px}
+#unlocked-details .file-navigation button:disabled{opacity:.3;cursor:default}
 #unlocked-details .relationship-detail{touch-action:pan-y}
-@media(max-width:800px){#unlocked-details #network-insight{font-size:11px}}
+#unlocked-details .relationship-detail .relationship-meaning{margin-top:18px}
+@media(max-width:650px){#unlocked-details .flip-back{padding:24px 20px 16px}#unlocked-details .relationship-detail .relationship-meaning{margin-top:14px}#unlocked-details .detail-markets{margin:8px 0 10px}}
