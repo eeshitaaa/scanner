@@ -403,3 +403,12 @@ body button:focus-visible{outline:2px solid #f6fefd;outline-offset:4px}
 @supports (-webkit-touch-callout: none){
  #landing #address,#email-unlock #report-email{font-size:16px}
 }
+
+/* Navigation stays inside the measured card, including wrapped mobile text. */
+#unlocked-details #wallet-detail-content{flex-shrink:0}
+#unlocked-details .file-navigation{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:16px;margin-top:12px;padding-top:8px;flex-shrink:0}
+#unlocked-details .file-navigation button{white-space:nowrap;line-height:1.25}
+#unlocked-details #previous-file{text-align:left;justify-self:start}
+#unlocked-details #next-file{text-align:right;justify-self:end}
+#unlocked-details #folder-toggle{pointer-events:auto}
+#unlocked-details .folder-back{cursor:pointer}
