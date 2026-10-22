@@ -44,16 +44,18 @@ function draw(){
 }
 function folderPath(panel,card){
  const source=card.getBoundingClientRect(),target=panel.getBoundingClientRect();
- const scale=Math.min(source.width/target.width,source.height/target.height,.82);
  const x=source.left+source.width/2-target.left-target.width/2;
  const y=source.top+source.height/2-target.top-target.height/2;
  const lift=Math.min(105,Math.max(65,source.height*.3));
- return {inside:`translate(${x}px,${y}px) scale(${scale}) rotateY(-180deg)`,raised:`translate(${x}px,${y-lift}px) scale(${scale}) rotateY(-180deg)`};
+ return {inside:`translate(${x}px,${y}px) rotateY(-180deg)`,raised:`translate(${x}px,${y-lift}px) rotateY(-180deg)`};
 }
 function folderLip(){
  const layout=$('.relationship-layout'),cover=$('#folder-toggle'),box=cover.getBoundingClientRect(),parent=layout.getBoundingClientRect();
- const lip=cover.cloneNode(true);lip.removeAttribute('id');lip.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));lip.className='return-cover';lip.disabled=true;lip.setAttribute('aria-hidden','true');
- Object.assign(lip.style,{left:(box.left-parent.left)+'px',top:(box.top-parent.top)+'px',width:box.width+'px',height:box.height+'px',padding:getComputedStyle(cover).padding});layout.append(lip);return lip;
+ const lip=cover.cloneNode(true);
+ // Freeze the rendered cover, including typography, before moving it into the overlay.
+ [cover,...cover.querySelectorAll('*')].forEach((original,i)=>{const clone=[lip,...lip.querySelectorAll('*')][i],style=getComputedStyle(original);for(const key of style)clone.style.setProperty(key,style.getPropertyValue(key));});
+ lip.removeAttribute('id');lip.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));lip.className='return-cover';lip.disabled=true;lip.setAttribute('aria-hidden','true');
+ Object.assign(lip.style,{position:'absolute',left:(box.left-parent.left)+'px',top:(box.top-parent.top)+'px',width:box.width+'px',height:box.height+'px',margin:'0',transform:'none',translate:'none',zIndex:'45',transition:'none',pointerEvents:'none'});layout.append(lip);return lip;
 }
 async function openCard(index,card){
  if(busy)return;busy=true;selected=index;frontVisible=true;draw();
@@ -61,7 +63,7 @@ async function openCard(index,card){
  panel.style.transform=path.inside;
  await motion(panel,[{transform:path.inside},{transform:path.raised}],340);
  lip.remove();
- await motion(panel,[{transform:path.raised},{transform:'translate(0,0) scale(1) rotateY(-180deg)'}],420);
+ await motion(panel,[{transform:path.raised},{transform:'translate(0,0) rotateY(-180deg)'}],420);
  await motion(panel,[{transform:'rotateY(-180deg)'},{transform:'rotateY(0deg)'}],480);
  panel.style.transform='';frontVisible=false;busy=false;draw();
  if(closeQueued){closeQueued=false;closeDetail();}else $('#close-wallet-detail').focus({preventScroll:true});
@@ -71,7 +73,7 @@ async function closeDetail(){
  const panel=$('#relationship-detail'),card=$('#relationship-nodes').children[previous],path=folderPath(panel,card);
  await motion(panel,[{transform:'rotateY(0deg)'},{transform:'rotateY(-180deg)'}],480);
  $('#orbit-map').classList.add('folder-returning');
- await motion(panel,[{transform:'translate(0,0) scale(1) rotateY(-180deg)'},{transform:path.raised}],420);
+ await motion(panel,[{transform:'translate(0,0) rotateY(-180deg)'},{transform:path.raised}],420);
  const lip=folderLip();
  await motion(panel,[{transform:path.raised},{transform:path.inside}],340);
  panel.hidden=true;lip.remove();$('#orbit-map').classList.remove('folder-returning');panel.style.transform='';
