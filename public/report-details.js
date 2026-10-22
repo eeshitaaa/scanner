@@ -20,7 +20,7 @@ const wait=ms=>new Promise(resolve=>setTimeout(resolve,reduced()?0:ms));
 async function motion(element,frames,duration=620){
  if(reduced())return;
  const animation=element.animate(frames,{duration,easing:'cubic-bezier(.22,.68,.18,1)',fill:'both'});
- try{await animation.finished;}catch{}animation.cancel();
+ try{await animation.finished;Object.assign(element.style,frames[frames.length-1]);}catch{}animation.cancel();
 }
 function face(w,i){const strength=Number.isFinite(w.strength)?w.strength:null;return `<span class="file-top"><span>WALLET DOSSIER</span><b>${String(i+1).padStart(2,'0')}</b></span><strong>${esc(short(w.address))}</strong><span class="file-correlation"><i></i>${strength===null?'Correlation unavailable':strength>=75?'High correlation':strength>=45?'Medium correlation':'Low correlation'}</span><span class="file-bottom"><span>${number(w.fills)} matched fills</span><span>↗</span></span>`;}
 function draw(){
@@ -42,38 +42,40 @@ function draw(){
  if(selected>=0){detail();$('.flip-front').innerHTML=`<span class="front-index">${String(selected+1).padStart(2,'0')}</span><strong class="front-address">${esc(short(rows[selected].address))}</strong>`;$('#previous-file').disabled=selected===0||busy;$('#next-file').disabled=selected===rows.length-1||busy;}
  $('#network-insight').textContent='Select 01–10 to explore a wallet';window.saveReportView?.();
 }
+function folderPath(panel,card){
+ const source=card.getBoundingClientRect(),target=panel.getBoundingClientRect();
+ const scale=Math.min(source.width/target.width,source.height/target.height,.82);
+ const x=source.left+source.width/2-target.left-target.width/2;
+ const y=source.top+source.height/2-target.top-target.height/2;
+ const lift=Math.min(105,Math.max(65,source.height*.3));
+ return {inside:`translate(${x}px,${y}px) scale(${scale}) rotateY(-180deg)`,raised:`translate(${x}px,${y-lift}px) scale(${scale}) rotateY(-180deg)`};
+}
+function folderLip(){
+ const layout=$('.relationship-layout'),cover=$('#folder-toggle'),box=cover.getBoundingClientRect(),parent=layout.getBoundingClientRect();
+ const lip=cover.cloneNode(true);lip.removeAttribute('id');lip.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));lip.className='return-cover';lip.disabled=true;lip.setAttribute('aria-hidden','true');
+ Object.assign(lip.style,{left:(box.left-parent.left)+'px',top:(box.top-parent.top)+'px',width:box.width+'px',height:box.height+'px',padding:getComputedStyle(cover).padding});layout.append(lip);return lip;
+}
 async function openCard(index,card){
- if(busy)return;busy=true;
- const source=card.getBoundingClientRect();selected=index;frontVisible=true;draw();
- const panel=$('#relationship-detail'),target=panel.getBoundingClientRect();
- const dx=source.left+source.width/2-target.left-target.width/2,dy=source.top+source.height/2-target.top-target.height/2;
- returnTransform=`translate(${dx*.2}px,${dy+75}px) scale(.66) rotateY(-180deg)`;
- panel.style.transform='rotateY(-180deg)';
- await motion(panel,[{transform:returnTransform},{transform:'translate(0,0) scale(1) rotateY(-180deg)'}],450);
+ if(busy)return;busy=true;selected=index;frontVisible=true;draw();
+ const panel=$('#relationship-detail'),path=folderPath(panel,card),lip=folderLip();
+ panel.style.transform=path.inside;
+ await motion(panel,[{transform:path.inside},{transform:path.raised}],340);
+ lip.remove();
+ await motion(panel,[{transform:path.raised},{transform:'translate(0,0) scale(1) rotateY(-180deg)'}],420);
  await motion(panel,[{transform:'rotateY(-180deg)'},{transform:'rotateY(0deg)'}],480);
- panel.style.transform='';
-
- frontVisible=false;
- busy=false;draw();if(closeQueued){closeQueued=false;closeDetail();}else $('#close-wallet-detail').focus({preventScroll:true});
+ panel.style.transform='';frontVisible=false;busy=false;draw();
+ if(closeQueued){closeQueued=false;closeDetail();}else $('#close-wallet-detail').focus({preventScroll:true});
 }
 async function closeDetail(){
  if(busy){closeQueued=true;return;}if(selected<0)return;busy=true;const previous=selected;
- const panel=$('#relationship-detail'),layout=$('.relationship-layout');
- const panelBox=panel.getBoundingClientRect(),cover=$('#folder-toggle'),coverBox=cover.getBoundingClientRect(),layoutBox=layout.getBoundingClientRect();
- panel.style.transform='rotateY(-180deg)';
+ const panel=$('#relationship-detail'),card=$('#relationship-nodes').children[previous],path=folderPath(panel,card);
  await motion(panel,[{transform:'rotateY(0deg)'},{transform:'rotateY(-180deg)'}],480);
  $('#orbit-map').classList.add('folder-returning');
- // The cover occludes the returning sheet, instead of fading the sheet out.
- const lip=cover.cloneNode(true);lip.removeAttribute('id');lip.className='return-cover';lip.disabled=true;lip.setAttribute('aria-hidden','true');
- const cs=getComputedStyle(cover);Object.assign(lip.style,{left:(coverBox.left-layoutBox.left)+'px',top:(coverBox.top-layoutBox.top)+'px',width:coverBox.width+'px',height:coverBox.height+'px',padding:cs.padding});layout.append(lip);
- const scale=Math.min(coverBox.width*.74/panelBox.width,coverBox.height*.68/panelBox.height);
- const dx=coverBox.left+coverBox.width/2-panelBox.left-panelBox.width/2;
- const dy=coverBox.top+coverBox.height*.50-panelBox.top-panelBox.height/2;
- const end=`translate(${dx}px,${dy}px) scale(${scale}) rotateY(-180deg)`;
- await motion(panel,[{transform:'translate(0,0) scale(1) rotateY(-180deg)'},{transform:end}],520);
- panel.style.transform=end;
+ await motion(panel,[{transform:'translate(0,0) scale(1) rotateY(-180deg)'},{transform:path.raised}],420);
+ const lip=folderLip();
+ await motion(panel,[{transform:path.raised},{transform:path.inside}],340);
  panel.hidden=true;lip.remove();$('#orbit-map').classList.remove('folder-returning');panel.style.transform='';
- selected=-1;frontVisible=false;busy=false;draw();$('#relationship-nodes').children[previous]?.querySelector('.file-index')?.focus({preventScroll:true});
+ selected=-1;frontVisible=false;busy=false;draw();card?.querySelector('.file-index')?.focus({preventScroll:true});
 }
 async function navigateFile(direction){
  const next=selected+direction;if(busy||next<0||next>=rows.length)return;
@@ -84,6 +86,12 @@ async function navigateFile(direction){
  busy=false;draw();if(closeQueued){closeQueued=false;closeDetail();}
 }
 $('#previous-file').addEventListener('click',()=>navigateFile(-1));$('#next-file').addEventListener('click',()=>navigateFile(1));
+// Horizontal touch swipes use the same transition as Previous / Next.
+let swipeStart=null;
+const swipePanel=$('#relationship-detail');
+swipePanel.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||busy||e.target.closest('button,a,input'))return;swipeStart={id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now()};});
+swipePanel.addEventListener('pointerup',e=>{const start=swipeStart;swipeStart=null;if(!start||start.id!==e.pointerId)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5&&performance.now()-start.time<1000)navigateFile(dx<0?1:-1);});
+swipePanel.addEventListener('pointercancel',()=>{swipeStart=null;});
 $('#close-wallet-detail').addEventListener('click',closeDetail);$('#relationship-detail').addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
 window.prepareReportDetails=report=>{
  expanded=false;selected=-1;folderOpen=true;busy=false;renderedPage=-1;isExample=report.example;
