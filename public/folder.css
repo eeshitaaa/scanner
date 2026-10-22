@@ -292,3 +292,21 @@
  #wallet-lock-box .locked-file-stack>i:nth-child(3n+2),#wallet-lock-box .locked-file-stack>i:nth-child(3n+2) b{background:#a2bda3}
  #wallet-lock-box .locked-file-stack>i:nth-child(3n),#wallet-lock-box .locked-file-stack>i:nth-child(3n) b{background:#c7d7c0}
 }
+
+/* Website CTA hierarchy from the ShieldTX brand book. */
+.input-prefix{display:none!important}
+body .primary,body #share-dialog #share-x{min-height:44px;border-radius:12px;background:#fff;color:#040405;border:1px solid #fff;padding:12px 20px;font-weight:500;font-size:13px;box-shadow:none;transition:background .18s,border-color .18s}
+body .primary:hover,body #share-dialog #share-x:hover{background:#ddd;border-color:#ddd;color:#040405}
+body .quiet,body #results #share,body #share-dialog #share-options{min-height:44px;border-radius:12px;background:transparent;border:1px solid #f6fefd40;color:#f6fefd;padding:12px 18px;font-size:13px;font-weight:500}
+body .quiet:hover,body #share-dialog #share-options:hover{background:#ffffff08;border-color:#f6fefd80}
+body .text-button{color:#97fce4;font-size:13px;font-weight:500}
+body button.primary:disabled,body button.quiet:disabled{background:#171e29;border-color:transparent;color:#6b7488;cursor:default}
+body button:focus-visible{outline:2px solid #f6fefd;outline-offset:4px}
+.score-card{--exposure-color:#c3cad6}.score-card[data-exposure="high"]{--exposure-color:#ff7b88}.score-card[data-exposure="low"]{--exposure-color:#97fce4}
+.score-card #score,.score-card #score-label{color:var(--exposure-color)}.score-card #meter{background:var(--exposure-color)}
+#unlocked-details .file-navigation button{font-size:13px;font-weight:650;min-height:40px;padding:8px 14px;border-radius:8px;border:1px solid #315a3c55;background:#315a3c0c;color:#173e25}
+#unlocked-details .file-navigation button:hover:not(:disabled){background:#315a3c19;border-color:#315a3c88}
+#unlocked-details .file-navigation button:disabled{opacity:.4;cursor:default}
+#unlocked-details #network-insight{font-size:13px;line-height:1.6;letter-spacing:.1px}
+#unlocked-details .relationship-detail{touch-action:pan-y}
+@media(max-width:800px){#unlocked-details #network-insight{font-size:11px}}
