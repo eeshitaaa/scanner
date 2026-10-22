@@ -386,3 +386,16 @@ body button:focus-visible{outline:2px solid #f6fefd;outline-offset:4px}
  #unlocked-details #orbit-map{height:550px;min-height:550px}
  #unlocked-details .relationship-layout.has-selection #orbit-map{height:550px;min-height:550px}
 }
+
+/* Preview refinement: navigation placement and mobile scanner spacing. */
+#unlocked-details .file-navigation{margin-top:8px;padding-top:2px}
+@media(min-width:801px){
+ #unlocked-details .coverage-label{margin-bottom:4px}
+}
+@media(max-width:800px){
+ #unlocked-details .file-navigation{margin-top:4px;padding-top:2px}
+ #unlocked-details .folder-open-icon{right:22px;top:72px;width:29px;height:29px;display:grid;place-items:center;line-height:1;font-size:18px;border:1px solid #c3dac66b;background:#b9d6bf0a;color:#e0eee2;box-shadow:inset 0 1px 0 #ffffff12;transform:none}
+ #landing .visual{margin-top:12px;margin-bottom:14px}
+ #landing #scan-form{margin-top:4px}
+}
+
