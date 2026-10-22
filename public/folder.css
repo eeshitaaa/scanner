@@ -313,3 +313,66 @@ body button:focus-visible{outline:2px solid #f6fefd;outline-offset:4px}
 #unlocked-details .relationship-detail{touch-action:pan-y}
 #unlocked-details .relationship-detail .relationship-meaning{margin-top:18px}
 @media(max-width:650px){#unlocked-details .flip-back{padding:24px 20px 16px}#unlocked-details .relationship-detail .relationship-meaning{margin-top:14px}#unlocked-details .detail-markets{margin:8px 0 10px}}
+
+/* Keep the folder itself entirely still during the preview interaction. */
+#unlocked-details .folder-selected #folder-toggle,#unlocked-details .folder-open #folder-toggle{filter:drop-shadow(0 1px 0 #728778) drop-shadow(0 16px 20px #0006);transition:none}
+#unlocked-details .folder-selected #relationship-nodes .wallet-file.active{visibility:visible}
+#unlocked-details .relationship-layout.has-selection #orbit-map{height:500px;min-height:500px}
+@media(max-width:800px){#unlocked-details #orbit-map,#unlocked-details .relationship-layout.has-selection #orbit-map{height:550px;min-height:550px}}
+
+#unlocked-details .card-in-transit .flip-front{transform:none;backface-visibility:visible}
+#unlocked-details .card-in-transit .flip-back,#unlocked-details .card-in-transit #close-wallet-detail{visibility:hidden}
+
+/* Preview refinement: readable navigation and white example link. */
+#example, #example:hover { color: #fff; }
+#unlocked-details .file-navigation button { font-size: 15px; font-weight: 600; min-height: 42px; padding: 9px 5px; }
+
+/* Animate the real file behind the fixed folder cover. */
+#unlocked-details #relationship-nodes .wallet-file.file-travelling { transition:none!important; z-index:30!important; }
+#unlocked-details #relationship-nodes .wallet-file.file-away { visibility:hidden!important; }
+
+#unlocked-details #orbit-map { overflow:visible; }
+/* Keep the projecting tab physically joined to its file during extraction. */
+#unlocked-details .file-travelling .file-index:after { top:100%; bottom:auto; left:-1px; right:-1px; width:auto; height:calc(var(--depth)*3px); background:inherit; border-inline:1px solid #c4d3be; }
+@media(max-width:800px){#unlocked-details .file-travelling .file-index:after{top:0;bottom:0;left:-4px;right:auto;width:4px;height:auto;border:0}}
+/* A single file with a front and reverse face; no mid-air element swap. */
+#unlocked-details #network-scene > .motion-file{position:absolute!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;translate:none!important;transform:rotateY(0deg);transform-style:preserve-3d;transform-origin:50% 50%;transition:none!important;z-index:19!important;opacity:1!important;visibility:visible!important;overflow:visible;pointer-events:auto;background:none!important;border:0!important;box-shadow:none!important;will-change:top,left,width,height,transform}
+#unlocked-details #network-scene > .motion-file-forward{z-index:45!important}
+#unlocked-details .motion-file-face{position:absolute;inset:0;border:1px solid #c4d3be;border-radius:12px;background:linear-gradient(130deg,#e9eee1,#c7d6be);box-shadow:inset 0 1px 0 #ffffffb3,0 2px 0 #76906c,0 12px 24px #0005;backface-visibility:hidden}
+#unlocked-details .motion-file-face .file-index{top:-26px!important;height:30px;left:12px!important;right:auto!important}
+#unlocked-details .motion-file-face .file-index:after{height:4px!important;top:auto!important;bottom:-1px!important;border:0}
+#unlocked-details .motion-file .motion-file-back{position:absolute!important;inset:0!important;top:0!important;left:0!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important;transform:rotateY(180deg)!important;backface-visibility:hidden;visibility:visible!important}
+#unlocked-details .motion-file-back .flip-front{display:none!important}
+#unlocked-details .motion-file-back .flip-back{backface-visibility:visible;transform:none}
+#unlocked-details .motion-file-back #close-wallet-detail{transform:none}
+#unlocked-details{overflow:visible}
+#unlocked-details #network-scene > .motion-file{outline:none!important;outline-offset:0!important}
+#unlocked-details .motion-file-face{pointer-events:none}
+#unlocked-details .motion-file-address{position:absolute;bottom:28px;left:32px;font:14px var(--mono);color:#34513a;letter-spacing:.2px}
+
+/* Final mobile layout and sharing polish. */
+.mobile-hero-label,.mobile-security-note{display:none}
+#unlocked-details .relationship-layout>.relationship-detail{height:410px}
+#unlocked-details .motion-file-back .flip-back{padding-top:25px;padding-bottom:16px}
+#unlocked-details .file-navigation{margin-top:14px}
+@media(max-width:800px){
+ .desktop-hero-label{display:none}.mobile-hero-label{display:inline;text-transform:uppercase;letter-spacing:.8px}
+ .shell header{height:54px;margin-top:8px;padding-inline:18px}
+ #landing{flex:1;justify-content:center;gap:12px;padding:18px 18px 16px}
+ #landing .hero-heading h1{font-size:clamp(30px,8vw,38px);margin:11px 0 0;line-height:1.08}
+ #landing .intro{font-size:14px;line-height:1.5}
+ #landing .visual{width:100%;max-width:clamp(170px,calc(100svh - 470px),260px)}
+ #landing .echo-stage{margin:0;aspect-ratio:560/390}
+ #landing .echo-caption,#landing #input-note{display:none}
+ #landing #scan-form{margin-top:0}#landing label{margin-bottom:8px;font-size:12px}
+ #landing .input-wrap{height:49px}#landing .actions{margin-top:22px;gap:18px}
+ #landing .primary{padding:12px 16px}#landing .text-button{font-size:12px}
+ .shell:has(#landing:not([hidden])) .mobile-security-note{display:block;text-align:center;color:#818c85;font-size:10px;line-height:1.5;margin:12px 12px 14px}
+ #share-dialog{width:calc(100vw - 16px);max-width:none;padding:44px 10px 22px;max-height:calc(100svh - 20px);border-radius:18px}
+ #share-dialog .holo-card,#share-canvas{border-radius:14px}
+ #share-dialog .share-footer{padding:0 7px}#share-caption{font-size:23px}
+ #unlocked-details .relationship-layout>.relationship-detail{height:465px}
+ #unlocked-details .motion-file-back .flip-back{padding:24px 20px 16px}
+ #unlocked-details .file-navigation{margin-top:12px;padding-top:10px}
+}
+@media(max-width:380px){#landing{padding-inline:14px;gap:10px}#landing .intro{font-size:13px}#landing .actions{gap:13px}#landing .primary{padding-inline:12px;font-size:12px}}
