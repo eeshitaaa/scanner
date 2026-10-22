@@ -399,3 +399,7 @@ body button:focus-visible{outline:2px solid #f6fefd;outline-offset:4px}
  #landing #scan-form{margin-top:4px}
 }
 
+/* iOS Safari and iOS browsers: prevent input-focus zoom without disabling pinch zoom. */
+@supports (-webkit-touch-callout: none){
+ #landing #address,#email-unlock #report-email{font-size:16px}
+}
