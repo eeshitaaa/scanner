@@ -28,7 +28,7 @@ function draw(){
  if(selected>=0&&(selected<start||selected>=start+visible.length))selected=-1;
  if(renderedPage!==start){
   nodes.replaceChildren();renderedPage=start;
-  visible.forEach((w,j)=>{const i=start+j,card=document.createElement('div');card.className='wallet-file';card.dataset.walletSlot=i;card.style.setProperty('--slot',j);card.style.setProperty('--depth',14-j);card.style.setProperty('--angle',(j-2)*3+'deg');card.style.setProperty('--lift',Math.abs(j-2)*14+'px');card.setAttribute('aria-label',`Explore wallet ${i+1}: ${short(w.address)}`);card.innerHTML=`<span class="file-edge" aria-hidden="true"></span><button class="file-index" type="button" aria-label="Open wallet ${i+1}: ${esc(short(w.address))}"><span class="tab-number">${String(i+1).padStart(2,'0')}</span></button>`;card.querySelector('.file-index').onclick=()=>{if(!busy&&folderOpen)openCard(i,card);};nodes.append(card);});
+  visible.forEach((w,j)=>{const i=start+j,card=document.createElement('div');card.className='wallet-file';card.dataset.walletSlot=i;card.style.setProperty('--slot',j);card.style.setProperty('--depth',14-j);card.style.setProperty('--angle',(j-2)*3+'deg');card.style.setProperty('--lift',Math.abs(j-2)*14+'px');card.setAttribute('aria-label',`Explore wallet ${i+1}: ${short(w.address)}`);card.innerHTML=`<span class="file-edge" aria-hidden="true"></span><button class="file-index" type="button" aria-label="Open wallet ${i+1}: ${esc(short(w.address))}"><span class="tab-number">${String(i+1).padStart(2,'0')}</span></button>`;card.querySelector('.file-index').onclick=e=>{e.stopPropagation();if(!busy&&folderOpen)openCard(i,card);};nodes.append(card);});
  }
  Array.from(nodes.querySelectorAll('.wallet-file:not(.blank-file)')).forEach((card,j)=>{card.classList.toggle('active',selected===Number(card.dataset.walletSlot));card.querySelector('.file-index').setAttribute('aria-pressed',String(selected===Number(card.dataset.walletSlot)));card.querySelector('.file-index').tabIndex=folderOpen&&selected<0?0:-1;});
  nodes.inert=!folderOpen||selected>=0;
@@ -40,10 +40,22 @@ function draw(){
  $('#folder-toggle').setAttribute('aria-expanded',String(selected>=0));$('#folder-toggle').disabled=!rows.length||busy;$('#folder-hint').textContent='Choose a numbered tab to pull out a card';
  $('#relationship-detail').hidden=selected<0;$('.relationship-layout').classList.toggle('has-selection',selected>=0);
  if(selected>=0){detail();$('.flip-front').innerHTML=`<span class="front-index">${String(selected+1).padStart(2,'0')}</span><strong class="front-address">${esc(short(rows[selected].address))}</strong>`;$('#previous-file').disabled=selected===0||busy;$('#next-file').disabled=selected===rows.length-1||busy;}
- $('#network-insight').textContent='Select 01–10 to explore a wallet';window.saveReportView?.();
+ $('#network-insight').textContent='Select 01–10 to explore a wallet';fitDetail();window.saveReportView?.();
 }
 // One physical file carries both faces for the entire journey.
 let flight=null;
+function fitDetail(){
+ if(selected<0)return;
+ const panel=$('#relationship-detail'),back=panel.querySelector('.flip-back'),content=$('#wallet-detail-content'),nav=panel.querySelector('.file-navigation');
+ const px=(style,key)=>parseFloat(style[key])||0,bs=getComputedStyle(back),ns=getComputedStyle(nav);
+ const height=Math.ceil(content.offsetHeight+nav.offsetHeight+px(ns,'marginTop')+px(ns,'marginBottom')+px(bs,'paddingTop')+px(bs,'paddingBottom')+px(bs,'borderTopWidth')+px(bs,'borderBottomWidth'));
+ const fitted=Math.max(window.innerWidth<=800?465:410,height);
+ panel.style.height=fitted+'px';
+ if(flight&&!busy){flight.card.style.height=fitted+'px';flight.geometry.front.height=fitted;}
+ $('#orbit-map').style.minHeight=Math.max(window.innerWidth<=800?550:500,fitted+70)+'px';
+}
+window.addEventListener('resize',()=>{if(!busy)fitDetail();});
+new ResizeObserver(()=>{if(!busy)fitDetail();}).observe($('#wallet-detail-content'));
 function journeyGeometry(card,panel){
  const scene=$('#network-scene').getBoundingClientRect(),r=card.getBoundingClientRect(),p=panel.getBoundingClientRect(),folder=$('#folder-toggle').getBoundingClientRect();
  const stored={left:r.left-scene.left,top:r.top-scene.top,width:r.width,height:r.height};
@@ -120,5 +132,6 @@ window.prepareReportDetails=report=>{
 window.getReportNetworkState=()=>({selected,expanded,folderOpen});
 window.restoreReportNetworkState=value=>{expanded=value?.expanded===true;selected=Number.isInteger(value?.selected)?value.selected:-1;folderOpen=true;draw();};
 window.revealReportWallets=()=>{folderOpen=true;selected=-1;draw();};
+$('#network-scene').addEventListener('click',e=>{if(e.target.closest('.file-index,.motion-file,#relationship-detail,#folder-toggle')||selected>=0||busy)return;if(e.target.closest('.wallet-file,.folder-back')&&rows.length)openCard(0,$('#relationship-nodes').children[0]);});
 $('#folder-toggle').addEventListener('click',()=>{if(selected>=0)closeDetail();else if(rows.length&&!busy)openCard(0,$('#relationship-nodes').children[0]);});
 })();
